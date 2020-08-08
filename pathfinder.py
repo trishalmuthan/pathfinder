@@ -4,7 +4,7 @@ from queue import PriorityQueue, Queue
 
 WIDTH = 800
 WIN = pygame.display.set_mode((WIDTH, WIDTH))
-pygame.display.set_caption("A* Path Finding Algorithm")
+pygame.display.set_caption("Pathfinder: a: A*, b: BFS, d: DFS")
 
 RED = (255, 0, 0)
 GREEN = (0, 255, 0)
