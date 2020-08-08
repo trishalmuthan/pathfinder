@@ -1,6 +1,6 @@
 import pygame
 import math
-from queue import PriorityQueue
+from queue import PriorityQueue, Queue
 
 WIDTH = 800
 WIN = pygame.display.set_mode((WIDTH, WIDTH))
@@ -98,7 +98,7 @@ def reconstruct_path(came_from, current, draw):
         current.make_path()
         draw()
 
-def algorithm(draw, grid, start, end):
+def astar(draw, grid, start, end):
 	count = 0
 	open_set = PriorityQueue()
 	open_set.put((0, count, start))
@@ -142,6 +142,79 @@ def algorithm(draw, grid, start, end):
 			current.make_closed()
 
 	return False
+
+def bfs(draw, grid, start, end):
+    queue = Queue()
+    queue.put(start)
+    explored = set()
+    came_from = {}
+
+    while not queue.empty():
+        for event in pygame.event.get():
+            if event.type == pygame.QUIT:
+                pygame.quit()
+
+        current = queue.get()
+
+        if current == end:
+            reconstruct_path(came_from, end, draw)
+            start.make_start()
+            end.make_end()
+            return True
+
+        explored.add(current)
+
+        for neighbor in current.neighbors:
+            if neighbor not in explored and not neighbor.is_closed():
+                came_from[neighbor] = current
+                queue.put(neighbor)
+                neighbor.make_open()
+
+        draw()
+
+        if current != start:
+            current.make_closed()
+
+
+    return False
+
+def dfs(draw, grid, start, end):
+    stack = []
+    stack.append(start)
+    explored = set()
+    came_from = {}
+
+    while stack:
+        for event in pygame.event.get():
+            if event.type == pygame.QUIT:
+                pygame.quit()
+
+        current = stack.pop()
+
+        if current == end:
+            reconstruct_path(came_from, end, draw)
+            start.make_start()
+            end.make_end()
+            return True
+
+        explored.add(current)
+
+        for neighbor in current.neighbors:
+            if neighbor not in explored and not neighbor.is_closed():
+                came_from[neighbor] = current
+                stack.append(neighbor)
+                neighbor.make_open()
+
+        draw()
+
+        if current != start:
+            current.make_closed()
+
+
+    return False
+
+
+
 
 def make_grid(rows, width):
     grid = []
@@ -219,12 +292,26 @@ def main(win, width):
                     end = None
                 
             if event.type == pygame.KEYDOWN:
-                if event.key == pygame.K_SPACE and start and end:
+                if event.key == pygame.K_a and start and end:
                     for row in grid:
                         for spot in row:
                             spot.update_neighbors(grid)
 
-                    algorithm(lambda: draw(win, grid, ROWS, width), grid, start, end)
+                    astar(lambda: draw(win, grid, ROWS, width), grid, start, end)
+
+                if event.key == pygame.K_b and start and end:
+                    for row in grid:
+                        for spot in row:
+                            spot.update_neighbors(grid)
+
+                    bfs(lambda: draw(win, grid, ROWS, width), grid, start, end)
+
+                if event.key == pygame.K_d and start and end:
+                    for row in grid:
+                        for spot in row:
+                            spot.update_neighbors(grid)
+
+                    dfs(lambda: draw(win, grid, ROWS, width), grid, start, end)
 
                 if event.key == pygame.K_c:
                     start = None
