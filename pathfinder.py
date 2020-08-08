@@ -4,7 +4,7 @@ from queue import PriorityQueue, Queue
 
 WIDTH = 800
 WIN = pygame.display.set_mode((WIDTH, WIDTH))
-pygame.display.set_caption("Pathfinder: a: A*, b: BFS, d: DFS")
+pygame.display.set_caption("Pathfinder: a: A*, b: BFS, d: DFS, g: GBFS")
 
 RED = (255, 0, 0)
 GREEN = (0, 255, 0)
@@ -213,8 +213,43 @@ def dfs(draw, grid, start, end):
 
     return False
 
+def gbfs(draw, grid, start, end):
+    pq = PriorityQueue()
+    pq.put((0, start))
+    came_from = {}
+    explored = set()
+
+    while not pq.empty():
+        for event in pygame.event.get():
+            if event.type == pygame.QUIT:
+                pygame.quit()
+
+        current = pq.get()[1]
+
+        if current == end:
+            reconstruct_path(came_from, end, draw)
+            start.make_start()
+            end.make_end()
+            return True
+
+        explored.add(current)
+
+        for neighbor in current.neighbors:
+            if neighbor not in explored and not neighbor.is_closed():
+                came_from[neighbor] = current
+                pq.put((h(neighbor.get_pos(), end.get_pos()), neighbor))
+                neighbor.make_open()
+
+        draw()
+
+        if current != start:
+            current.make_closed()
+
+    return False
 
 
+
+        
 
 def make_grid(rows, width):
     grid = []
@@ -312,6 +347,13 @@ def main(win, width):
                             spot.update_neighbors(grid)
 
                     dfs(lambda: draw(win, grid, ROWS, width), grid, start, end)
+
+                if event.key == pygame.K_g and start and end:
+                    for row in grid:
+                        for spot in row:
+                            spot.update_neighbors(grid)
+
+                    gbfs(lambda: draw(win, grid, ROWS, width), grid, start, end)
 
                 if event.key == pygame.K_c:
                     start = None
