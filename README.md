@@ -1,3 +1,3 @@
-# AstarPathfinder
+# Pathfinder
 
-A pathfinding visualization that conducts the A* algorithm
+A pathfinding visualization that conducts the various different search algorithms
